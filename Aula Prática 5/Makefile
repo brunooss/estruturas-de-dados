@@ -22,7 +22,7 @@ HDRS = $(INC)/arvore_binaria.hpp
 
 EXE = $(BIN)/main
 
-all: $(EXE)
+run: $(EXE)
 
 $(BIN)/main: $(OBJS)
 	$(CC) -g -o $(BIN)/main $(OBJS)
