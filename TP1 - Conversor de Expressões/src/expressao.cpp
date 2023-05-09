@@ -1,16 +1,35 @@
 #include "../include/expressao.hpp"
-#include <stack>
-#include <sstream>
-#include <unordered_map>
 
-Expressao::Expressao(const std::string &expression) : infixExpression(expression) {}
+#include "pilha.cpp"
+
+#include <sstream>
+#include <iostream>
+
+Expressao::Expressao(const std::string type, std::string &expression)
+{
+    if (type == "INFIXA")
+    {
+        infixExpression = &expression;
+        postfixExpression = nullptr;
+    }
+    else if (type == "POSFIXA")
+    {
+        postfixExpression = &expression;
+        infixExpression = nullptr;
+    }
+    else
+    {
+        postfixExpression = nullptr;
+        infixExpression = nullptr;
+    }
+}
 
 bool Expressao::isOperator(char c)
 {
     return c == '+' || c == '-' || c == '*' || c == '/';
 }
 
-int Expressao::getPrecedence(char op)
+int Expressao::precedencia(char op)
 {
     if (op == '+' || op == '-')
         return 1;
@@ -20,96 +39,219 @@ int Expressao::getPrecedence(char op)
         return 0;
 }
 
-bool Expressao::hasHigherPrecedence(char op1, char op2)
+bool Expressao::maiorPrecedencia(char op1, char op2)
 {
-    int precedence1 = getPrecedence(op1);
-    int precedence2 = getPrecedence(op2);
+    int precedence1 = precedencia(op1);
+    int precedence2 = precedencia(op2);
     return precedence1 >= precedence2;
 }
 
-std::string Expressao::infixToPostfix()
+bool Expressao::infixaValida()
 {
-    std::stack<char> operators;
-    std::ostringstream oss;
-    std::istringstream iss(infixExpression);
-    char c;
+    Pilha<char> parentheses;
 
-    while (iss >> c)
+    for (char c : *infixExpression)
     {
-        if (isdigit(c))
+        if (c == '(')
         {
-            oss << c;
-        }
-        else if (c == '(')
-        {
-            operators.push(c);
+            parentheses.empilha(c);
         }
         else if (c == ')')
         {
-            while (!operators.empty() && operators.top() != '(')
+            if (parentheses.vazia() || parentheses.topo() != '(')
             {
-                oss << operators.top();
-                operators.pop();
+                return false;
             }
-
-            if (!operators.empty() && operators.top() == '(')
-                operators.pop();
-        }
-        else if (isOperator(c))
-        {
-            while (!operators.empty() && operators.top() != '(' && hasHigherPrecedence(operators.top(), c))
-            {
-                oss << operators.top();
-                operators.pop();
-            }
-            operators.push(c);
+            parentheses.desempilha();
         }
     }
 
-    while (!operators.empty())
-    {
-        oss << operators.top();
-        operators.pop();
-    }
-
-    return oss.str();
+    return parentheses.vazia();
 }
 
-int Expressao::evaluatePostfixExpression(const std::string &expression)
+bool Expressao::posfixaValida()
 {
-    std::stack<int> stack;
+    Pilha<int> operands;
 
-    for (char c : expression)
+    std::istringstream iss(*postfixExpression);
+    std::string token;
+
+    while (iss >> token)
     {
-        if (isdigit(c))
+        if (isdigit(token[0]))
         {
-            stack.push(c - '0');
+            operands.empilha(std::stoi(token));
         }
-        else if (isOperator(c))
+        else
         {
-            int operand2 = stack.top();
-            stack.pop();
-            int operand1 = stack.top();
-            stack.pop();
+            if (operands.tamanho() < 2)
+            {
+                return false;
+            }
+            operands.desempilha();
+        }
+    }
 
-            if (c == '+')
+    return operands.tamanho() == 1;
+}
+
+std::string Expressao::paraPosfixa()
+{
+    if (postfixExpression != nullptr)
+        return *postfixExpression;
+
+    if (infixExpression == nullptr)
+    {
+        return "erro";
+    }
+
+    Pilha<char> operators;
+    std::ostringstream oss;
+    std::istringstream iss(*infixExpression);
+    std::string token;
+
+    while (iss >> token)
+    {
+        if (isdigit(token[0]) || token[0] == '.')
+        {
+            oss << token << " ";
+        }
+        else if (token == "(")
+        {
+            operators.empilha('(');
+        }
+        else if (token == ")")
+        {
+            while (!operators.vazia() && operators.topo() != '(')
             {
-                stack.push(operand1 + operand2);
+                oss << operators.topo() << " ";
+                operators.desempilha();
             }
-            else if (c == '-')
+
+            if (!operators.vazia() && operators.topo() == '(')
+                operators.desempilha();
+        }
+        else if (isOperator(token[0]))
+        {
+            while (!operators.vazia() && operators.topo() != '(' && maiorPrecedencia(operators.topo(), token[0]))
             {
-                stack.push(operand1 - operand2);
+                oss << operators.topo() << " ";
+                operators.desempilha();
             }
-            else if (c == '*')
+            operators.empilha(token[0]);
+        }
+    }
+
+    while (!operators.vazia())
+    {
+        oss << operators.topo() << " ";
+        operators.desempilha();
+    }
+
+    std::string postfixExpression = oss.str();
+    // Remove espaços extras antes e depois dos operadores
+    size_t startPos = postfixExpression.find_first_not_of(' ');
+    size_t endPos = postfixExpression.find_last_not_of(' ');
+    postfixExpression = postfixExpression.substr(startPos, endPos - startPos + 1);
+
+    return postfixExpression;
+}
+
+std::string Expressao::paraInfixa()
+{
+    if (infixExpression != nullptr)
+        return *infixExpression;
+
+    if (postfixExpression == nullptr)
+    {
+        return "erro";
+    }
+
+    Pilha<std::string> pilha;
+
+    std::istringstream iss(*postfixExpression);
+    std::string token;
+
+    while (iss >> token)
+    {
+        if (isOperator(token[0]))
+        {
+            std::string operand2 = pilha.topo();
+            pilha.desempilha();
+            std::string operand1 = pilha.topo();
+            pilha.desempilha();
+
+            std::ostringstream oss;
+            oss << "(" << operand1 << " " << token << " " << operand2 << ")";
+            pilha.empilha(oss.str());
+        }
+        else
+        {
+            pilha.empilha(token);
+        }
+    }
+
+    if (pilha.vazia())
+    {
+        return "";
+    }
+
+    return pilha.topo();
+}
+
+long double Expressao::resolve()
+{
+    std::string expression;
+
+    if (postfixExpression == nullptr && infixExpression == nullptr)
+    {
+        throw new std::exception;
+    }
+    else if (postfixExpression != nullptr)
+    {
+        expression = *postfixExpression;
+    }
+    else if (infixExpression != nullptr)
+    {
+        expression = this->paraPosfixa();
+    }
+
+    Pilha<long double> pilha;
+    std::istringstream iss(expression);
+    std::string token;
+
+    while (iss >> token)
+    {
+        if (isdigit(token[0]) || token[0] == '.')
+        {
+            long double value = std::stod(token);
+            pilha.empilha(value);
+        }
+        else if (isOperator(token[0]))
+        {
+            long double operand2 = pilha.topo();
+            pilha.desempilha();
+            long double operand1 = pilha.topo();
+            pilha.desempilha();
+
+            if (token[0] == '+')
             {
-                stack.push(operand1 * operand2);
+                pilha.empilha(operand1 + operand2);
             }
-            else if (c == '/')
+            else if (token[0] == '-')
             {
-                stack.push(operand1 / operand2);
+                pilha.empilha(operand1 - operand2);
+            }
+            else if (token[0] == '*')
+            {
+                pilha.empilha(operand1 * operand2);
+            }
+            else if (token[0] == '/')
+            {
+                pilha.empilha(operand1 / operand2);
             }
         }
     }
 
-    return stack.top();
+    return pilha.topo();
 }

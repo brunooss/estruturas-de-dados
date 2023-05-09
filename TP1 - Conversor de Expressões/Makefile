@@ -27,7 +27,7 @@ all: $(EXE)
 $(BIN)/main: $(OBJS)
 	$(CC) -g -o $(BIN)/main $(OBJS)
 	
-$(OBJ)/expressao.o: $(HDRS) $(SRC)/expressao.cpp 
+$(OBJ)/expressao.o: $(HDRS) $(SRC)/expressao.cpp $(OBJ)/pilha.o
 	$(CC) $(CFLAGS) -c $(SRC)/expressao.cpp -o $(OBJ)/expressao.o
 
 $(OBJ)/pilha.o: $(HDRS) $(SRC)/pilha.cpp 

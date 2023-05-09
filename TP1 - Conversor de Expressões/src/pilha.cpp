@@ -1,39 +1,80 @@
-#include "pilha.hpp"
-#include <iostream>
-using namespace std;
+#include "../include/pilha.hpp"
 
-Pilha::Pilha() {
-    topo = -1; // a pilha está inicialmente vazia
-}
+template <typename T>
+Pilha<T>::Pilha() : topNode(nullptr) {}
 
-bool Pilha::estaVazia() {
-    return topo == -1;
-}
-
-bool Pilha::estaCheia() {
-    return topo == MAX_SIZE - 1;
-}
-
-void Pilha::empilha(int x) {
-    if (estaCheia()) {
-        cout << "Erro: estouro de pilha\n";
-        return;
+template <typename T>
+Pilha<T>::~Pilha()
+{
+    while (!vazia())
+    {
+        desempilha();
     }
-    arr[++topo] = x;
 }
 
-void Pilha::desempilha() {
-    if (estaVazia()) {
-        cout << "Erro: subfluxo de pilha\n";
-        return;
-    }
-    topo--;
+template <typename T>
+void Pilha<T>::empilha(const T &valor)
+{
+    No *novoNo = new No(valor, topNode);
+    topNode = novoNo;
 }
 
-int Pilha::topoDaPilha() {
-    if (estaVazia()) {
-        cout << "Erro: a pilha está vazia\n";
-        return -1;
+template <typename T>
+void Pilha<T>::desempilha()
+{
+    if (!vazia())
+    {
+        No *temp = topNode;
+        topNode = topNode->proximo;
+        delete temp;
     }
-    return arr[topo];
+    else
+    {
+        throw std::runtime_error("Pilha vazia! Impossível desempilhar.");
+    }
+}
+
+template <typename T>
+T &Pilha<T>::topo()
+{
+    if (!vazia())
+    {
+        return topNode->valor;
+    }
+    else
+    {
+        throw std::runtime_error("Pilha vazia!");
+    }
+}
+
+template <typename T>
+const T &Pilha<T>::topo() const
+{
+    if (!vazia())
+    {
+        return topNode->valor;
+    }
+    else
+    {
+        throw std::runtime_error("Pilha vazia!");
+    }
+}
+
+template <typename T>
+bool Pilha<T>::vazia() const
+{
+    return topNode == nullptr;
+}
+
+template <typename T>
+int Pilha<T>::tamanho() const
+{
+    int count = 0;
+    No *temp = topNode;
+    while (temp != nullptr)
+    {
+        temp = temp->proximo;
+        count++;
+    }
+    return count;
 }

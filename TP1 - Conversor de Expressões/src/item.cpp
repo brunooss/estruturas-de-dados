@@ -5,7 +5,7 @@ public:
 
     enum class TipoOperador { Soma, Subtracao, Multiplicacao, Divisao, Numero }
 
-    double valor;
+    long double valor;
     TipoOperador operador;
 
     Item::isOperador() {
@@ -16,7 +16,7 @@ public:
       return (this.operador == TipoOperador::Numero);
     }
 
-    Item(double valor, TipoOperador operador);
+    Item(long double valor, TipoOperador operador);
     ~Item();
 };
 
