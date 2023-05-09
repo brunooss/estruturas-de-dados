@@ -1,5 +1,7 @@
 #include "../include/expressao.hpp"
 #include "../include/pilha.hpp"
+
+#include <fstream>
 #include <iostream>
 #include <iomanip>
 #include <string>
@@ -7,15 +9,17 @@ using namespace std;
 
 int main()
 {
+    freopen("entrada.txt", "r", stdin);
+
     std::string comando;
     std::string tipoExp;
     std::string exp;
 
     Expressao *expressao = nullptr;
 
-    while (true)
+    std::string linha;
+    while (!cin.eof())
     {
-        // Leitura do comando, tipo de expressão e expressão
         std::cin >> comando;
 
         if (comando == "LER")
@@ -28,7 +32,6 @@ int main()
                 expressao = nullptr;
             }
 
-            // Verificar o tipo de expressão
             if (tipoExp == "INFIXA")
             {
                 Expressao infixa("INFIXA", exp);
@@ -42,8 +45,6 @@ int main()
                 {
                     cout << "ERRO: " << tipoExp << " NAO VALIDA" << std::endl;
                 }
-
-                // Restante do código para lidar com expressão infixa...
             }
             else if (tipoExp == "POSFIXA")
             {

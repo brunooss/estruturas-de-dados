@@ -25,16 +25,16 @@ EXE = $(BIN)/main
 all: $(EXE)
 
 $(BIN)/main: $(OBJS)
-	$(CC) -g -o $(BIN)/main $(OBJS)
+	$(CC) -pg -g -o $(BIN)/main $(OBJS)
 	
 $(OBJ)/expressao.o: $(HDRS) $(SRC)/expressao.cpp $(OBJ)/pilha.o
-	$(CC) $(CFLAGS) -c $(SRC)/expressao.cpp -o $(OBJ)/expressao.o
+	$(CC) $(CFLAGS) -pg -c $(SRC)/expressao.cpp -o $(OBJ)/expressao.o
 
 $(OBJ)/pilha.o: $(HDRS) $(SRC)/pilha.cpp 
-	$(CC) $(CFLAGS) -c $(SRC)/pilha.cpp -o $(OBJ)/pilha.o
+	$(CC) $(CFLAGS) -pg -c $(SRC)/pilha.cpp -o $(OBJ)/pilha.o
 
 $(OBJ)/main.o: $(SRC)/main.cpp
-	$(CC) $(CFLAGS) -c $(SRC)/main.cpp -o $(OBJ)/main.o
+	$(CC) $(CFLAGS) -pg -c $(SRC)/main.cpp -o $(OBJ)/main.o
 
 clean:
 	rm -f $(EXE) $(OBJS) gmon.out
