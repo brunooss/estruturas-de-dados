@@ -12,6 +12,7 @@ public:
     Reta(const Ponto& ponto1, const Ponto& ponto2);
     const Ponto& getPonto1() const;
     const Ponto& getPonto2() const;
+    void equacaoReta() const;
 };
 
 #endif

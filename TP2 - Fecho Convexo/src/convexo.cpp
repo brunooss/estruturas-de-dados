@@ -154,58 +154,26 @@ void FechoConvexo::insertionsort(Ponto pontoReferencia) {
     }
 }
 
-void FechoConvexo::bucketsort(Ponto pontoReferencia) {
-    int tamanho = pontos.getTamanho();
+void FechoConvexo::bubblesort(Ponto pontoReferencia) {
+    int i, j;
+        bool swapped;
 
-    // Criar os buckets vazios
-    Lista<Lista<Ponto>> buckets;
+        for (i = 0; i < pontos.getTamanho() - 1; i++) {
+            swapped = false;
+            for (j = 0; j < pontos.getTamanho() - i - 1; j++) {
+                bool deveTrocar = orientacao(pontoReferencia, pontos[j], pontos[j + 1]) == 0 ?
+                    !(pontoReferencia.calcularDistancia(pontos[j]) < pontoReferencia.calcularDistancia(pontos[j + 1])) : !(orientacao(pontoReferencia, pontos[j], pontos[j + 1]) == -1);
 
-    for (int i = 0; i < tamanho; i++) {
-        Lista<Ponto> temp;
-
-        buckets[i] = temp;
-    }
-
-    // Colocar os pontos nos buckets correspondentes
-    for (int i = 0; i < tamanho; i++) {
-        int distancia = pontoReferencia.calcularDistancia(pontos[i]);
-        int indice = (distancia * tamanho) / (getMaximo(pontoReferencia) + 1);
-        buckets[indice].adicionar(pontos[i]);
-    }
-
-    // Ordenar cada bucket individualmente usando Insertion Sort
-    for (int i = 0; i < tamanho; i++) {
-        Lista<Ponto> bucket = buckets[i];
-
-        int tamanho = bucket.getTamanho();
-        for (int i = 1; i < tamanho; i++) {
-            Ponto chave = bucket[i];
-            int j = i - 1;
-
-            bool deveTrocar = orientacao(pontoReferencia, bucket[j], chave) == 0 ?
-                !(pontoReferencia.calcularDistancia(bucket[j]) < pontoReferencia.calcularDistancia(chave)) : !(orientacao(pontoReferencia, bucket[j], chave) == -1);
-
-            while (j >= 0 && deveTrocar) {
-                bucket[j + 1] = bucket[j];
-                j--;
-
-                if (j >= 0) {
-                    deveTrocar = orientacao(pontoReferencia, bucket[j], chave) == 0 ?
-                        !(pontoReferencia.calcularDistancia(bucket[j]) < pontoReferencia.calcularDistancia(chave)) : !(orientacao(pontoReferencia, bucket[j], chave) == -1);
+                if (deveTrocar) {
+                    Ponto temp = pontos[j];
+                    pontos[j] = pontos[j + 1];
+                    pontos[j + 1] = temp;
+                    swapped = true;
                 }
             }
-            bucket[j + 1] = chave;
-        }
-    }
 
-    // Juntar os pontos ordenados dos buckets em um único vetor
-    int indice = 0;
-    for (int i = 0; i < tamanho; i++) {
-        for (int j = 0; j < buckets[i].getTamanho(); j++) {
-            pontos[indice] = buckets[i][j];
-            indice++;
+            if (swapped == false) break;
         }
-    }
 }
 
 int FechoConvexo::getMaximo(Ponto pontoReferencia) {
@@ -249,28 +217,8 @@ void FechoConvexo::ordenarPolar(Ponto pontoReferencia, std::string ordenacao) {
         mergesort(pontoReferencia, 0, pontos.getTamanho() - 1);
     } else if (ordenacao == "insertionsort") {
         insertionsort(pontoReferencia);
-    } else if (ordenacao == "bucketsort") {
-        bucketsort(pontoReferencia);
     } else if (ordenacao == "bubblesort") {
-        int i, j;
-        bool swapped;
-
-        for (i = 0; i < pontos.getTamanho() - 1; i++) {
-            swapped = false;
-            for (j = 0; j < pontos.getTamanho() - i - 1; j++) {
-                bool deveTrocar = orientacao(pontoReferencia, pontos[j], pontos[j + 1]) == 0 ?
-                    !(pontoReferencia.calcularDistancia(pontos[j]) < pontoReferencia.calcularDistancia(pontos[j + 1])) : !(orientacao(pontoReferencia, pontos[j], pontos[j + 1]) == -1);
-
-                if (deveTrocar) {
-                    Ponto temp = pontos[j];
-                    pontos[j] = pontos[j + 1];
-                    pontos[j + 1] = temp;
-                    swapped = true;
-                }
-            }
-
-            if (swapped == false) break;
-        }
+        bubblesort(pontoReferencia);
     } else {
         throw std::domain_error("Este método de ordenação não é aceito.");
     }

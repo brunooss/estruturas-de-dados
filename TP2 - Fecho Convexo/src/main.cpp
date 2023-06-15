@@ -9,6 +9,7 @@
 #include "lista.hpp"
 #include "pilha.hpp"
 #include "convexo.hpp"
+#include "reta.hpp"
 
 using namespace std;
 
@@ -114,11 +115,14 @@ int main(int argc, char *argv[]) {
         std::cout << "GRAHAM+LINEAR:        " << fixed << setprecision(3) << grahamLinearDuration    << "s" << endl;
         std::cout << "JARVIS:               " << fixed << setprecision(3) << jarvisDuration          << "s" << endl;
 
-        // std::cout << "Fecho Convexo (Graham - BucketSort): ";
-        // for (int i = 0; i < fechoGrahamBucketSort.getTamanho(); i++) {
-        //     std::cout << "(" << fechoGrahamBucketSort[i].getX() << ", " << fechoGrahamBucketSort[i].getY() << ") ";
-        // }
-        // std::cout << std::endl;
+        cout << endl << endl;
+
+        cout << "Equações de reta do fecho convexo: " << endl;
+        for (int i = 0; i < fechoGrahamMergeSort.getTamanho() - 1; i++) {
+            Reta reta(fechoGrahamMergeSort[i], fechoGrahamMergeSort[i + 1]);
+
+            reta.equacaoReta();
+        }
         
         return 0;
     } catch (std::invalid_argument& e) {

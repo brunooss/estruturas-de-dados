@@ -31,7 +31,7 @@ private:
     void mergesort(Ponto pontoReferencia, int esquerda, int direita);
     void merge(Ponto pontoReferencia, int esquerda, int meio, int direita);
     void insertionsort(Ponto pontoReferencia);
-    void bucketsort(Ponto pontoReferencia);
+    void bubblesort(Ponto pontoReferencia);
     void countingSort(Ponto pontoReferencia, int tamanho, int exp);
 
 };
